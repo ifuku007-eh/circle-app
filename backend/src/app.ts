@@ -6,6 +6,10 @@ import authRoutes from "./routes/auth.route";
 import postRoutes from "./routes/post.route";
 import commentRoutes from "./routes/comment.route";
 import likeRoutes from "./routes/like.route";
+import uploadRoutes from "./routes/upload.route";
+import userRoutes from "./routes/user.route";
+import followRoutes from "./routes/follow.route";
+import notificationRoutes from "./routes/notification.route";
 
 const app = express();
 
@@ -16,7 +20,7 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(passport.initialize());
 
 app.get("/", (req, res) => {
@@ -27,5 +31,9 @@ app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
 app.use("/comment", commentRoutes);
 app.use("/like", likeRoutes);
+app.use("/upload", uploadRoutes);
+app.use("/users", userRoutes);
+app.use("/follow", followRoutes);
+app.use("/notifications", notificationRoutes);
 
 export default app;

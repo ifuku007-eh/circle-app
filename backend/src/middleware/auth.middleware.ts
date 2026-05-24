@@ -1,37 +1,36 @@
-import { Request, Response, NextFunction } from "express"
-import jwt from "jsonwebtoken"
+import { Request, Response, NextFunction, RequestHandler } from "express";
+import jwt from "jsonwebtoken";
 
 export interface AuthRequest extends Request {
-  user?: {
-    id: number
-  }
+  user?: any;
 }
 
-export const authenticate = (
+export const authenticate: RequestHandler = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): void => {
   try {
-    const authHeader = req.headers.authorization
+    const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Unauthorized" })
+      res.status(401).json({ message: "Unauthorized" });
+      return;
     }
 
-    const token = authHeader.split(" ")[1]
+    const token = authHeader.split(" ")[1];
 
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string
-    ) as any
+    ) as any;
 
     req.user = {
-      id: decoded.userId
-    }
+      id: decoded.userId,
+    };
 
-    next()
+    next();
   } catch {
-    return res.status(401).json({ message: "Unauthorized" })
+    res.status(401).json({ message: "Unauthorized" });
   }
-}
+};

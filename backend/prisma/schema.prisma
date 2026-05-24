@@ -13,21 +13,26 @@ model User {
   email     String   @unique
   password  String?
   name      String
+  bio       String?
+  avatar    String?
   provider  String   @default("local")
   createdAt DateTime @default(now())
 
-  // RELATIONS (WAJIB ADA)
   refreshTokens RefreshToken[]
   posts         Post[]
   comments      Comment[]
   likes         Like[]
+  notifications Notification[] @relation("UserNotifications")
+
+  following Follow[] @relation("UserFollowing")
+  followers Follow[] @relation("UserFollowers")
 }
 
 model RefreshToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
 }
 
@@ -36,7 +41,7 @@ model Post {
   content   String
   image     String?
   authorId  Int
-  author    User     @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   comments Comment[]
@@ -45,13 +50,14 @@ model Post {
 
 model Comment {
   id        Int      @id @default(autoincrement())
-  content   String
+  content   String?
+  image     String?
   postId    Int
   userId    Int
   createdAt DateTime @default(now())
 
-  post Post @relation(fields: [postId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Like {
@@ -59,8 +65,33 @@ model Like {
   postId Int
   userId Int
 
-  post Post @relation(fields: [postId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerId Int
+  followingId Int
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  fromUserId Int?
+  type      String
+  message   String
+  postId    Int?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
 }
