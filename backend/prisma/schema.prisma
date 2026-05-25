@@ -73,7 +73,7 @@ model Like {
 
 model Follow {
   id          Int      @id @default(autoincrement())
-  followerId Int
+  followerId  Int
   followingId Int
   createdAt   DateTime @default(now())
 

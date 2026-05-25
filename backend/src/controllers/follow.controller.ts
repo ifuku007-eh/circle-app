@@ -12,6 +12,14 @@ export const toggleFollow = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: "Tidak bisa follow diri sendiri" });
   }
 
+  const targetUser = await prisma.user.findUnique({
+    where: { id: followingId },
+  });
+
+  if (!targetUser) {
+    return res.status(404).json({ message: "User tidak ditemukan" });
+  }
+
   const existing = await prisma.follow.findUnique({
     where: {
       followerId_followingId: {
@@ -23,7 +31,23 @@ export const toggleFollow = async (req: AuthRequest, res: Response) => {
 
   if (existing) {
     await prisma.follow.delete({ where: { id: existing.id } });
-    return res.json({ following: false });
+
+    const updatedTarget = await prisma.user.findUnique({
+      where: { id: followingId },
+      select: {
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+      },
+    });
+
+    return res.json({
+      following: false,
+      count: updatedTarget?._count,
+    });
   }
 
   await prisma.follow.create({
@@ -46,5 +70,20 @@ export const toggleFollow = async (req: AuthRequest, res: Response) => {
     },
   });
 
-  res.json({ following: true });
+  const updatedTarget = await prisma.user.findUnique({
+    where: { id: followingId },
+    select: {
+      _count: {
+        select: {
+          followers: true,
+          following: true,
+        },
+      },
+    },
+  });
+
+  return res.json({
+    following: true,
+    count: updatedTarget?._count,
+  });
 };

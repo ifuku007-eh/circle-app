@@ -146,3 +146,55 @@ export const getSuggestions = async (req: AuthRequest, res: Response) => {
 
   res.json(users);
 };
+
+export const getFollowers = async (req: AuthRequest, res: Response) => {
+  const userId = Number(req.params.id);
+
+  const followers = await prisma.follow.findMany({
+    where: {
+      followingId: userId,
+    },
+    include: {
+      follower: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+          bio: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  res.json(followers);
+};
+
+export const getFollowing = async (req: AuthRequest, res: Response) => {
+  const userId = Number(req.params.id);
+
+  const following = await prisma.follow.findMany({
+    where: {
+      followerId: userId,
+    },
+    include: {
+      following: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+          bio: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  res.json(following);
+};

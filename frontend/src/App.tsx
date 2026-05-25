@@ -7,7 +7,7 @@ import Layout from "./components/Layout";
 import OAuthSuccess from "./pages/OAuthSuccess";
 import Profile from "./pages/Profile"; 
 import PostDetail from "./pages/PostDetail";
-import Notifications from "./pages/Notification";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
