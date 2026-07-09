@@ -20,7 +20,11 @@ export const uploadImage = async (req: any, res: Response) => {
       message: "Upload berhasil",
       url: result.secure_url,
     });
-  } catch (error) {
-    return res.status(500).json({ message: "Upload gagal" });
+  } catch (error: any) {
+    console.error("Upload image error:", error);
+    return res.status(500).json({
+      message: "Upload gagal",
+      reason: error?.message || String(error),
+    });
   }
 };

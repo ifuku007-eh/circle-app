@@ -12,9 +12,10 @@ export default function CreatePost({ onPost }: any) {
     try {
       const url = await uploadImage(file);
       setImage(url);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Upload gambar gagal:", err);
-      alert("Gagal upload gambar. Coba lagi.");
+      const reason = err?.response?.data?.reason || err?.response?.data?.message || err?.message;
+      alert(`Gagal upload gambar.${reason ? ` (${reason})` : " Coba lagi."}`);
     }
   };
 

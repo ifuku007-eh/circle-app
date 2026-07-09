@@ -35,9 +35,10 @@ export default function Profile() {
     try {
       const url = await uploadImage(file);
       setAvatar(url);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Upload avatar gagal:", err);
-      alert("Gagal upload foto profil. Coba lagi.");
+      const reason = err?.response?.data?.reason || err?.response?.data?.message || err?.message;
+      alert(`Gagal upload foto profil.${reason ? ` (${reason})` : " Coba lagi."}`);
     }
   };
 
