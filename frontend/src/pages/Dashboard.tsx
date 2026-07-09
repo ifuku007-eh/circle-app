@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 export default function Dashboard() {
   const [posts, setPosts] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [peopleYouMayKnow, setPeopleYouMayKnow] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadPosts = async () => {
@@ -20,14 +21,21 @@ export default function Dashboard() {
     setSuggestions(res.data || []);
   };
 
+  const loadPeopleYouMayKnow = async () => {
+    const res = await api.get("/users/people-you-may-know");
+    setPeopleYouMayKnow(res.data || []);
+  };
+
   useEffect(() => {
     loadPosts();
     loadSuggestions();
+    loadPeopleYouMayKnow();
   }, []);
 
   const handleFollow = async (id: number) => {
     await api.post(`/follow/${id}`);
     setSuggestions((prev) => prev.filter((user) => user.id !== id));
+    setPeopleYouMayKnow((prev) => prev.filter((user) => user.id !== id));
   };
 
   const addPost = (post: any) => {
@@ -55,11 +63,47 @@ export default function Dashboard() {
       <aside className="space-y-4">
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
           <h2 className="mb-3 font-bold">Follow Suggestion</h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Terhubung lewat orang yang kamu follow.
+          </p>
 
           {suggestions.length === 0 ? (
             <p className="text-sm text-slate-400">Belum ada suggestion.</p>
           ) : (
             suggestions.map((user) => (
+              <div
+                key={user.id}
+                className="mb-3 flex items-center justify-between gap-3"
+              >
+                <Link to={`/profile/${user.id}`} className="flex min-w-0 items-center gap-3">
+                  <img
+                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                  <span className="truncate text-sm font-semibold">{user.name}</span>
+                </Link>
+
+                <button
+                  onClick={() => handleFollow(user.id)}
+                  className="rounded-lg bg-cyan-500 px-3 py-1 text-xs font-bold text-slate-950"
+                >
+                  Follow
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+          <h2 className="mb-3 font-bold">People You May Know</h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Belum ada koneksi dengan jaringan kamu.
+          </p>
+
+          {peopleYouMayKnow.length === 0 ? (
+            <p className="text-sm text-slate-400">Belum ada rekomendasi.</p>
+          ) : (
+            peopleYouMayKnow.map((user) => (
               <div
                 key={user.id}
                 className="mb-3 flex items-center justify-between gap-3"

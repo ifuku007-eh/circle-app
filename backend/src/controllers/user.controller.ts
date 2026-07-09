@@ -129,11 +129,70 @@ export const getSuggestions = async (req: AuthRequest, res: Response) => {
 
   const followingIds = following.map((f) => f.followingId);
 
+  if (followingIds.length === 0) {
+    return res.json([]);
+  }
+
+  // Users followed by people the current user follows (2nd-degree connections),
+  // excluding the current user and people already followed.
+  const secondDegree = await prisma.follow.findMany({
+    where: {
+      followerId: { in: followingIds },
+      followingId: { notIn: [currentUserId, ...followingIds] },
+    },
+    select: { followingId: true },
+  });
+
+  const suggestionIds = [...new Set(secondDegree.map((f) => f.followingId))];
+
+  if (suggestionIds.length === 0) {
+    return res.json([]);
+  }
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: suggestionIds } },
+    select: {
+      id: true,
+      name: true,
+      avatar: true,
+      bio: true,
+    },
+    take: 5,
+  });
+
+  res.json(users);
+};
+
+export const getPeopleYouMayKnow = async (req: AuthRequest, res: Response) => {
+  const currentUserId = req.user!.id;
+
+  const following = await prisma.follow.findMany({
+    where: { followerId: currentUserId },
+    select: { followingId: true },
+  });
+
+  const followingIds = following.map((f) => f.followingId);
+
+  let connectedIds: number[] = [];
+
+  if (followingIds.length > 0) {
+    const secondDegree = await prisma.follow.findMany({
+      where: { followerId: { in: followingIds } },
+      select: { followingId: true },
+    });
+
+    connectedIds = secondDegree.map((f) => f.followingId);
+  }
+
+  // Exclude the current user, everyone they already follow, and anyone
+  // connected through people they follow — only fully unconnected users remain.
+  const excludeIds = [
+    ...new Set([currentUserId, ...followingIds, ...connectedIds]),
+  ];
+
   const users = await prisma.user.findMany({
     where: {
-      id: {
-        notIn: [currentUserId, ...followingIds],
-      },
+      id: { notIn: excludeIds },
     },
     select: {
       id: true,

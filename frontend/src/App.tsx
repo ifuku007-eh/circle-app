@@ -8,6 +8,7 @@ import OAuthSuccess from "./pages/OAuthSuccess";
 import Profile from "./pages/Profile"; 
 import PostDetail from "./pages/PostDetail";
 import Notifications from "./pages/Notifications";
+import FollowList from "./pages/FollowList";
 
 function App() {
   return (
@@ -34,6 +35,17 @@ function App() {
             <PrivateRoute>
               <Layout>
                 <Profile />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/profile/:id/:type"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <FollowList />
               </Layout>
             </PrivateRoute>
           }
