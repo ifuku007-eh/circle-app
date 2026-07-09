@@ -32,8 +32,13 @@ export default function Profile() {
 
   const handleAvatar = async (file?: File) => {
     if (!file) return;
-    const url = await uploadImage(file);
-    setAvatar(url);
+    try {
+      const url = await uploadImage(file);
+      setAvatar(url);
+    } catch (err) {
+      console.error("Upload avatar gagal:", err);
+      alert("Gagal upload foto profil. Coba lagi.");
+    }
   };
 
   const handleSave = async () => {

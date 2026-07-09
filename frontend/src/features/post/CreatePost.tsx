@@ -9,8 +9,13 @@ export default function CreatePost({ onPost }: any) {
 
   const handleFile = async (file?: File) => {
     if (!file) return;
-    const url = await uploadImage(file);
-    setImage(url);
+    try {
+      const url = await uploadImage(file);
+      setImage(url);
+    } catch (err) {
+      console.error("Upload gambar gagal:", err);
+      alert("Gagal upload gambar. Coba lagi.");
+    }
   };
 
   const handleSubmit = async () => {
